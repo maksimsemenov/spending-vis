@@ -459,43 +459,49 @@ function parseData (initialData) {
 	return data;
 }
 function generateData (amount) {
-	var lowCats = ['Gasoline', 'Merchandise', 'Supermarkets', 'Pharmacy', 'Household', 'Transportation'];
-	var middleCats = ['Entertainment', 'Supermarkets', 'Restaurants', 'Household', 'Clothes', 'Service',];
-	var hightCats = ['Payments and Credits', 'Medicine', 'Travel', 'Education'];
-	var descriptions = {
-		"Payments and Credits": ["JPMorgan Chase", "Bank of America", "Citigroup", "Wells Fargo", "Capital One", "BB&T"],
-		"Medicine": ["Adirondack Medical Center", "Auburn Community Hospital", "Blythedale Children's Hospital", "Oscar's Health", "MedLife", "Tribeca Smiles", "Premier Dental Associates of Lower Manhattan", "Lambert Pediatric Dentistry"],
-		"Travel": ["American Airlines", "Brussels Airlines", "United Airlines", "Cosmopolitan Hotel Tribeca", "Duane Street Hotel", "The Greenwich Hotel", "The James New York", "Sheraton Tribeca New York Hotel", "Conrad New York"],
-		"Gasoline": ["Amoco", "BP", "Buc-ee", "Chevron", "Circle K", "Citgo", "Clark Brands", "Conoco", "Costco brand gasoline", "Cumberland Farms"],
-		"Merchandise": ["Obriens Market", "Plum Market", "R Ranch Markets", "Nob Hill Foods", "Red Apple", "Rice Supermarkets", "Riesbeck Food Markets", "Roche Bros"],
-		"Entertainment": ["African Grove", "Chelsea Theater Center", "The Flea Theater", "Hippodrome Theatre", "Imperial Theater", "New York City Center", "New York Theatre Workshop", "The Town Hall", "Theater For The New City", "Film Forum", "IFC Center", "Regal Cinemas Battery Park 11", "A7", "Angels & Kings", "Area", "Chicago City Limits", "Marquee", "Slipper Room", "Dizzy's Club Coca-Cola"],
-		"Supermarkets": ["Albertsons", "Kroger", "Walmart Supercenters", "D'Agostino Supermarkets", "Festival Foods", "Food Giant"],
-		"Pharmacy": ["Bartell Drugs", "CVS Pharmacy", "Dakota Drug", "Discount Drug Mart", "Duane Reade", "Family Pharmacy", "Fruth Pharmacy", "Good Neighbor Pharmacy", "Health Mart", "Jean Coutu"],
-		"Restaurants": ["15 East", "2nd Ave Deli", "ABC Kitchen", "Aldea", "Annisa", "Ayada", "Balaboosta", "Balthazar", "Barney Greengrass", "Black Seed", "Blue Hill", "Boqueria", "Brick Lane Curry House", "Brushstroke", "Buttermilk Channel", "Buvette", "Café Boulud", "Cosme", "Daniel", "DBGB", "Del Posto", "Dovetail", "Elan", "Eleven Madison Park", "Empellón Cocina", "Fatty 'Cue", "Fedora", "Fette Sau", "Frankies 457 Spuntino", "Franny's", "Gotham Bar and Grill", "Hecho en Dumbo", "Hide-Chan Ramen", "Hill Country", "Il Buco Alimentari & Vineria", "Ilili", "Ippudo NY", "Junoon", "Kajitsu", "Takashi", "Tamarind Tribeca", "Tanoreen", "Taqueria Coatzingo", "Telepan", "Tertulia", "The Breslin Bar & Dining Room", "The Commodore", "The Dutch", "The John Dory Oyster Bar", "The Kitchen at Brooklyn Fare", "The NoMad", "The Spotted Pig", "Torrisi Italian Specialties", "Txikito", "Uncle Boons", "Union Square Cafe", "Ushiwakamaru", "Xi'an Famous Foods", "Zabb Elee"],
-		"Household": ["Linens 'n Things", "Rhodes Furniture", "Seamans Furniture", "Wickes Furniture", "IKEA", "S. H. Kress", "Shopper's City", "Sky City", "Sprouse-Reitz", "TG&Y", "Lafayette Radio", "Lechmere", "Radio Shack", "Best Buy", "The Warehouse", "Video Concepts", "Ultimate Electronics"],
-		"Clothes": ["Abercrombie and Fitch", "Hollister", "American Eagle", "Nike", "Forever21", "Aeropostale", "Ralph Lauren", "H & M", "ZARA", "Victoria's Secret", "All American Clothing", "American Apparel", "Black Halo", "Brooks Brothers", "Carhartt", "Emerson Fry", "Hanky Panky", "Hart Schaffner Marx", "Hickey Freeman", "Imogene and Willie", "Left Field", "Nanette Lepore", "Pendleton Woolen Mills", "Pointer Brand", "Raleigh Denim", "Taylor Stitch", "Todd Shelton", "Wild Fox", "Alden", "Allen Edmonds", "Capps Shoe Company", "The Frye Company", "Munro Shoes", "New Balance", "Oakstreet Bootmakers", "Quoddy", "Rancourt and Company", "Red Wing Heritage line", "Russell Moccasin Co.", "Fear of God LA", "Freemans Sporting Club", "Gitman Brothers", "Gray (by Saks 5th Ave)", "Helmut Lang", "J. Lawrence Khakis", "James Perse", "Johnson Woolen Mills", "Kokatat", "Live Nation", "LL Bean", "Local Green", "Marine Layer", "Mister California", "Mister Turk by Trina Turk", "Montana Woolen Shop", "Oak Street Bootmakers", "Ovadia & Sons", "Orvis", "Patrick Ervell"],
-		"Service": ["White On White Cleaners Corporation", "Handy.com", "Brown Bag Laundry Corporation", "Laundry Service", "Laundry By Shelli Segal", "The Laundry Center", "Home Clean Home", "Homejoy", "ServiceMaster Recovery by L & M", "Clean Cut Movers NYC", "Clean Popo"],
-		"Transportation": ["MTA", "Herts", "Uber", "Get Taxi", "Taxi", "Cars and truks Service"],
-		"Education": ["Coursera", "Linda School", "Now How School", "Code Mentors", "Stanford Online Courses", "Edx", "EF English Schools", "Kopelan"]				
-	};
+	// Transaction templates: BLS-aligned categories with realistic US merchant names and amount ranges
+	// Weight = approximate % of transactions (normalized)
+	var templates = [
+		{ category: 'Groceries', desc: ['Walmart', 'Kroger', 'Costco', 'Target', 'Publix', 'Safeway', 'Trader Joe\'s', 'Aldi', 'Whole Foods', 'Food Lion', 'H-E-B'], min: 25, max: 95, weight: 18 },
+		{ category: 'Restaurants', desc: ['McDonald\'s', 'Starbucks', 'Chipotle', 'Chick-fil-A', 'Panera Bread', 'Subway', 'Taco Bell', 'Wendy\'s', 'Dunkin\'', 'Olive Garden', 'Applebee\'s', 'Pizza Hut'], min: 8, max: 45, weight: 15 },
+		{ category: 'Gasoline', desc: ['Shell', 'Exxon', 'Chevron', 'BP', 'Costco Gas', 'Sam\'s Club Fuel', 'QT', 'RaceTrac', 'Wawa'], min: 35, max: 65, weight: 6 },
+		{ category: 'Shopping', desc: ['Amazon', 'Target', 'Walmart', 'Home Depot', 'Lowe\'s', 'Best Buy', 'eBay', 'Etsy'], min: 22, max: 120, weight: 12 },
+		{ category: 'Utilities', desc: ['Electric Company', 'Gas Company', 'Water Utility', 'Internet Service', 'Mobile Phone'], min: 45, max: 180, weight: 4 },
+		{ category: 'Subscriptions', desc: ['Netflix', 'Spotify', 'Amazon Prime', 'Disney+', 'Hulu', 'Apple Music', 'YouTube Premium', 'Gym Membership'], min: 10, max: 55, weight: 6 },
+		{ category: 'Healthcare', desc: ['CVS Pharmacy', 'Walgreens', 'Rite Aid', 'Doctor Copay', 'Dental', 'Vision Care'], min: 15, max: 85, weight: 5 },
+		{ category: 'Transportation', desc: ['Uber', 'Lyft', 'Parking', 'Transit Pass', 'Toll Road'], min: 5, max: 45, weight: 5 },
+		{ category: 'Entertainment', desc: ['AMC Theatres', 'Regal Cinemas', 'Concert', 'Bowling', 'State Park'], min: 12, max: 75, weight: 5 },
+		{ category: 'Personal Care', desc: ['Haircut', 'Nail Salon', 'Dry Cleaner'], min: 18, max: 55, weight: 3 },
+		{ category: 'Clothing', desc: ['Old Navy', 'TJ Maxx', 'Kohl\'s', 'Nike', 'Gap', 'Ross'], min: 25, max: 95, weight: 4 },
+		{ category: 'Insurance', desc: ['Auto Insurance', 'Health Insurance', 'Renters Insurance'], min: 85, max: 220, weight: 2 }
+	];
+
+	function randBetween(min, max) {
+		return Math.round((min + Math.random() * (max - min)) * 100) / 100;
+	}
+	function pickWeighted() {
+		var total = templates.reduce(function (s, t) { return s + t.weight; }, 0);
+		var r = Math.random() * total;
+		for (var i = 0; i < templates.length; i++) {
+			r -= templates[i].weight;
+			if (r <= 0) return templates[i];
+		}
+		return templates[0];
+	}
 
 	var data = [];
-	for (var i=0; i<amount; i++) {
-		var currentDate = new Date();
-		var date = new Date(2015, 
-							Math.round(Math.random()*currentDate.getMonth()),
-							Math.round(Math.random()*(currentDate.getDate()-1)+1),
-							Math.round(Math.random()*24),
-							Math.round(Math.random()*60));
-		var r = Math.floor(Math.random()*80)/10+1;
-		var sum = Math.floor(1000 * Math.pow((Math.sin((r*2+2)/3)+Math.cos(1/r + 3) + Math.pow(r, 2/3)/1.2), 4))/100;
-		var category = sum>800 ? hightCats[Math.floor(Math.random()*hightCats.length)] : sum>80 ? middleCats[Math.floor(Math.random()*middleCats.length)] : lowCats[Math.floor(Math.random()*lowCats.length)];
-		data.push({
-			sum: sum,
-			category: category,
-			description: descriptions[category][Math.floor(Math.random()*descriptions[category].length)],
-			date: date
-		});
+	var endDate = new Date();
+	var startDate = new Date(endDate.getFullYear(), endDate.getMonth() - 2, 1);
+
+	for (var i = 0; i < amount; i++) {
+		var t = pickWeighted();
+		var sum = randBetween(t.min, t.max);
+		var desc = t.desc[Math.floor(Math.random() * t.desc.length)];
+		var ms = startDate.getTime() + Math.random() * (endDate.getTime() - startDate.getTime());
+		var date = new Date(ms);
+		date.setHours(Math.floor(Math.random() * 24), Math.floor(Math.random() * 60), 0, 0);
+
+		data.push({ sum: sum, category: t.category, description: desc, date: date });
 	}
 	return data;
 }
